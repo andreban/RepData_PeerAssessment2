@@ -1,6 +1,6 @@
 # Comparison of Economic and Public Health Damages on the NOAA storm database
 Andre Bandarra  
-17-10-2014  
+22-10-2014  
 #Introduction
 
 The objective of this analysis is provide a brief comparison of the economic and public health damage caused by events on the U.S. National Oceanic and Atmospheric Administration's (NOAA) storm database.
@@ -107,10 +107,13 @@ damageInjurydata$cropdmg[damageInjurydata$cropdmgexp == 'b'] <- damageInjurydata
 ```
 
 
-Sum the crop damage data with the property damage data, so as to get the total economic damage. Also, sum the number of injuries and the number of fatalities to calculate to total public health damage.
+Sum the crop damage data with the property damage data, so as to get the total economic damage. Also, sum the number of injuries and the number of fatalities to calculate to total public health damage. 
+
+Also, convert the Total Economic Damage to Billions of Dollars, to make it easier to read on the report.
 
 ```r
 damageInjurydata$totaleconomicdamage <- damageInjurydata$cropdmg + damageInjurydata$propdmg;
+damageInjurydata$totaleconomicdamage <- round(damageInjurydata$totaleconomicdamage / 1000000000,2);
 damageInjurydata$totalhealthdamage <- damageInjurydata$injuries + damageInjurydata$fatalities;
 ```
 
@@ -124,12 +127,12 @@ summary(lossbyevttype)
 
 ```
 ##     evtype          totalhealthdamage totaleconomicdamage
-##  Length:444         Min.   :    0     Min.   :0.00e+00   
-##  Class :character   1st Qu.:    0     1st Qu.:5.00e+03   
-##  Mode  :character   Median :    0     Median :1.00e+05   
-##                     Mean   :  351     Mean   :1.07e+09   
-##                     3rd Qu.:    5     3rd Qu.:5.00e+06   
-##                     Max.   :96979     Max.   :1.50e+11
+##  Length:444         Min.   :    0     Min.   :  0        
+##  Class :character   1st Qu.:    0     1st Qu.:  0        
+##  Mode  :character   Median :    0     Median :  0        
+##                     Mean   :  351     Mean   :  1        
+##                     3rd Qu.:    5     3rd Qu.:  0        
+##                     Max.   :96979     Max.   :148
 ```
 
 
@@ -148,26 +151,35 @@ othersDmg <- sum(sortedDmg$totaleconomicdamage[11:nrows])
 othersInjuries <- sum(sortedDmg$totalhealthdamage[11:nrows])
 
 top10Dmg <- rbind(top10Dmg, c("others", othersInjuries, othersDmg))
+top10Dmg$totaleconomicdamage <- as.numeric(top10Dmg$totaleconomicdamage)
+top10Dmg$totalhealthdamage <- as.numeric(top10Dmg$totalhealthdamage)
+rownames(top10Dmg) <- c()
 
 top10Inj <- sortedHuman[c(1:10),]
 othersDmg <- sum(sortedHuman$totaleconomicdamage[11:nrows])
 othersInjuries <- sum(sortedHuman$totalhealthdamage[11:nrows])
 
 top10Inj <- rbind(top10Inj, c("others", othersInjuries, othersDmg))
+top10Inj$totaleconomicdamage <- as.numeric(top10Inj$totaleconomicdamage)
+top10Inj$totalhealthdamage <- as.numeric(top10Inj$totalhealthdamage)
+rownames(top10Inj) <- c()
 ```
 
 #Results
 
+###Top Events by Economic Damage  
+On the following plot, it is possible to see that floods are the greatest source of economic damage, with 147.69 billions of US dollars. At least two times the value of the second greatest source, which are Hurricanes / Typhoons, with 71.9 billons of US dollars in damage. 
+
 ```r
-par(mfrow = c(1,2))
-pie(as.numeric(top10Dmg$totaleconomicdamage), labels=top10Dmg$evtype, main="Top Events by Economic Damage", cex=0.7)
-pie(as.numeric(top10Inj$totalhealthdamage), labels=top10Inj$evtype, main="Top Events by Health Damage", cex=0.7)
+library(ggplot2)
+qplot(evtype, totaleconomicdamage,data= top10Dmg, geom="bar", stat="identity", 
+      color=evtype, fill=evtype, xlab="Event Type", ylab="Damage in Billions of US Dollars")
 ```
 
 ![plot of chunk unnamed-chunk-10](./PeerAssessment2_files/figure-html/unnamed-chunk-10.png) 
 
 
-###Top Events by Economic Damage  
+A table showing the top 10 causes of Economic Damage
 
 ```r
 library(xtable)
@@ -176,22 +188,32 @@ print(xtable(top10Dmg[,c(1,3)]), type="html", ,comment=FALSE)
 
 <table border=1>
 <tr> <th>  </th> <th> evtype </th> <th> totaleconomicdamage </th>  </tr>
-  <tr> <td align="right"> 74 </td> <td> flood </td> <td> 150319678257 </td> </tr>
-  <tr> <td align="right"> 200 </td> <td> hurricane/typhoon </td> <td> 71913712800 </td> </tr>
-  <tr> <td align="right"> 368 </td> <td> tornado </td> <td> 57352114048.7 </td> </tr>
-  <tr> <td align="right"> 314 </td> <td> storm surge </td> <td> 43323541000 </td> </tr>
-  <tr> <td align="right"> 112 </td> <td> hail </td> <td> 18758221520.7 </td> </tr>
-  <tr> <td align="right"> 61 </td> <td> flash flood </td> <td> 17562179167.1 </td> </tr>
-  <tr> <td align="right"> 39 </td> <td> drought </td> <td> 15018672000 </td> </tr>
-  <tr> <td align="right"> 191 </td> <td> hurricane </td> <td> 14610229010 </td> </tr>
-  <tr> <td align="right"> 277 </td> <td> river flood </td> <td> 10148404500 </td> </tr>
-  <tr> <td align="right"> 213 </td> <td> ice storm </td> <td> 8967041360 </td> </tr>
-  <tr> <td align="right"> 11 </td> <td> others </td> <td> 68449048816.21 </td> </tr>
+  <tr> <td align="right"> 1 </td> <td> flood </td> <td align="right"> 147.69 </td> </tr>
+  <tr> <td align="right"> 2 </td> <td> hurricane/typhoon </td> <td align="right"> 71.90 </td> </tr>
+  <tr> <td align="right"> 3 </td> <td> tornado </td> <td align="right"> 43.63 </td> </tr>
+  <tr> <td align="right"> 4 </td> <td> storm surge </td> <td align="right"> 43.23 </td> </tr>
+  <tr> <td align="right"> 5 </td> <td> hail </td> <td align="right"> 15.97 </td> </tr>
+  <tr> <td align="right"> 6 </td> <td> drought </td> <td align="right"> 14.90 </td> </tr>
+  <tr> <td align="right"> 7 </td> <td> hurricane </td> <td align="right"> 14.56 </td> </tr>
+  <tr> <td align="right"> 8 </td> <td> flash flood </td> <td align="right"> 14.03 </td> </tr>
+  <tr> <td align="right"> 9 </td> <td> river flood </td> <td align="right"> 10.12 </td> </tr>
+  <tr> <td align="right"> 10 </td> <td> ice storm </td> <td align="right"> 8.77 </td> </tr>
+  <tr> <td align="right"> 11 </td> <td> others </td> <td align="right"> 60.05 </td> </tr>
    </table>
 
-
-
 ###Top Events by Health Damage  
+
+The number of people injured/deceased by Tornados is 96979, which is more than ten times the number of people injured/deceased by Excessive Heat(8428)
+
+```r
+qplot(evtype, totalhealthdamage,data= top10Inj, geom="bar", stat="identity", 
+      color=evtype, fill=evtype, xlab="Event Type", ylab="Number of People Injured / Deceased")
+```
+
+![plot of chunk unnamed-chunk-12](./PeerAssessment2_files/figure-html/unnamed-chunk-12.png) 
+
+
+A table showing the top 10 causes of Public Health Damage
 
 ```r
 print(xtable(top10Inj[,c(1,2)]), type="html", ,comment=FALSE)
@@ -199,22 +221,20 @@ print(xtable(top10Inj[,c(1,2)]), type="html", ,comment=FALSE)
 
 <table border=1>
 <tr> <th>  </th> <th> evtype </th> <th> totalhealthdamage </th>  </tr>
-  <tr> <td align="right"> 368 </td> <td> tornado </td> <td> 96979 </td> </tr>
-  <tr> <td align="right"> 50 </td> <td> excessive heat </td> <td> 8428 </td> </tr>
-  <tr> <td align="right"> 384 </td> <td> tstm wind </td> <td> 7461 </td> </tr>
-  <tr> <td align="right"> 74 </td> <td> flood </td> <td> 7259 </td> </tr>
-  <tr> <td align="right"> 228 </td> <td> lightning </td> <td> 6046 </td> </tr>
-  <tr> <td align="right"> 129 </td> <td> heat </td> <td> 3037 </td> </tr>
-  <tr> <td align="right"> 61 </td> <td> flash flood </td> <td> 2755 </td> </tr>
-  <tr> <td align="right"> 213 </td> <td> ice storm </td> <td> 2064 </td> </tr>
-  <tr> <td align="right"> 329 </td> <td> thunderstorm wind </td> <td> 1621 </td> </tr>
-  <tr> <td align="right"> 438 </td> <td> winter storm </td> <td> 1527 </td> </tr>
-  <tr> <td align="right"> 11 </td> <td> others </td> <td> 18496 </td> </tr>
+  <tr> <td align="right"> 1 </td> <td> tornado </td> <td align="right"> 96979.00 </td> </tr>
+  <tr> <td align="right"> 2 </td> <td> excessive heat </td> <td align="right"> 8428.00 </td> </tr>
+  <tr> <td align="right"> 3 </td> <td> tstm wind </td> <td align="right"> 7461.00 </td> </tr>
+  <tr> <td align="right"> 4 </td> <td> flood </td> <td align="right"> 7259.00 </td> </tr>
+  <tr> <td align="right"> 5 </td> <td> lightning </td> <td align="right"> 6046.00 </td> </tr>
+  <tr> <td align="right"> 6 </td> <td> heat </td> <td align="right"> 3037.00 </td> </tr>
+  <tr> <td align="right"> 7 </td> <td> flash flood </td> <td align="right"> 2755.00 </td> </tr>
+  <tr> <td align="right"> 8 </td> <td> ice storm </td> <td align="right"> 2064.00 </td> </tr>
+  <tr> <td align="right"> 9 </td> <td> thunderstorm wind </td> <td align="right"> 1621.00 </td> </tr>
+  <tr> <td align="right"> 10 </td> <td> winter storm </td> <td align="right"> 1527.00 </td> </tr>
+  <tr> <td align="right"> 11 </td> <td> others </td> <td align="right"> 18496.00 </td> </tr>
    </table>
 
-
-
-#Conclusion
+###Conclusions
 Altough Tornados are, by far, the greatest threat to public health, it is only on the 3rd place when looking at the economic damage. 
 
 Floods and Hurricanes/Typhoons are the events that cause more economic damage, but Floods are only the 4th cause of Health Damages and Hurricanes/Typhoons dont show up on the list. 

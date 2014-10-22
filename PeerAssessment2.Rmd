@@ -1,7 +1,7 @@
 ---
 title: "Comparison of Economic and Public Health Damages on the NOAA storm database"
 author: "Andre Bandarra"
-date: "17-10-2014"
+date: "22-10-2014"
 output:
   html_document:
     keep_md: yes
@@ -97,9 +97,12 @@ damageInjurydata$cropdmg[damageInjurydata$cropdmgexp == 'b'] <- damageInjurydata
 ```
 
 
-Sum the crop damage data with the property damage data, so as to get the total economic damage. Also, sum the number of injuries and the number of fatalities to calculate to total public health damage.
+Sum the crop damage data with the property damage data, so as to get the total economic damage. Also, sum the number of injuries and the number of fatalities to calculate to total public health damage. 
+
+Also, convert the Total Economic Damage to Billions of Dollars, to make it easier to read on the report.
 ```{r}
 damageInjurydata$totaleconomicdamage <- damageInjurydata$cropdmg + damageInjurydata$propdmg;
+damageInjurydata$totaleconomicdamage <- round(damageInjurydata$totaleconomicdamage / 1000000000,2);
 damageInjurydata$totalhealthdamage <- damageInjurydata$injuries + damageInjurydata$fatalities;
 ```
 
@@ -125,39 +128,54 @@ othersDmg <- sum(sortedDmg$totaleconomicdamage[11:nrows])
 othersInjuries <- sum(sortedDmg$totalhealthdamage[11:nrows])
 
 top10Dmg <- rbind(top10Dmg, c("others", othersInjuries, othersDmg))
+top10Dmg$totaleconomicdamage <- as.numeric(top10Dmg$totaleconomicdamage)
+top10Dmg$totalhealthdamage <- as.numeric(top10Dmg$totalhealthdamage)
+rownames(top10Dmg) <- c()
 
 top10Inj <- sortedHuman[c(1:10),]
 othersDmg <- sum(sortedHuman$totaleconomicdamage[11:nrows])
 othersInjuries <- sum(sortedHuman$totalhealthdamage[11:nrows])
 
 top10Inj <- rbind(top10Inj, c("others", othersInjuries, othersDmg))
+top10Inj$totaleconomicdamage <- as.numeric(top10Inj$totaleconomicdamage)
+top10Inj$totalhealthdamage <- as.numeric(top10Inj$totalhealthdamage)
+rownames(top10Inj) <- c()
 ```
 
 #Results
+
+###Top Events by Economic Damage  
+On the following plot, it is possible to see that floods are the greatest source of economic damage, with 147.69 billions of US dollars. At least two times the value of the second greatest source, which are Hurricanes / Typhoons, with 71.9 billons of US dollars in damage. 
 ```{r, fig.width=10}
-par(mfrow = c(1,2))
-pie(as.numeric(top10Dmg$totaleconomicdamage), labels=top10Dmg$evtype, main="Top Events by Economic Damage", cex=0.7)
-pie(as.numeric(top10Inj$totalhealthdamage), labels=top10Inj$evtype, main="Top Events by Health Damage", cex=0.7)
+library(ggplot2)
+qplot(evtype, totaleconomicdamage,data= top10Dmg, geom="bar", stat="identity", 
+      color=evtype, fill=evtype, xlab="Event Type", ylab="Damage in Billions of US Dollars")
 ```
 
 
-###Top Events by Economic Damage  
+A table showing the top 10 causes of Economic Damage
 ```{r, results='asis'}
 library(xtable)
 print(xtable(top10Dmg[,c(1,3)]), type="html", ,comment=FALSE)
 ```
 
-
-
 ###Top Events by Health Damage  
+
+The number of people injured/deceased by Tornados is 96979, which is more than ten times the number of people injured/deceased by Excessive Heat(8428)
+```{r, fig.width=10}
+qplot(evtype, totalhealthdamage,data= top10Inj, geom="bar", stat="identity", 
+      color=evtype, fill=evtype, xlab="Event Type", ylab="Number of People Injured / Deceased")
+
+```
+
+
+A table showing the top 10 causes of Public Health Damage
 ```{r, results='asis'}
 print(xtable(top10Inj[,c(1,2)]), type="html", ,comment=FALSE)
 
 ```
 
-
-
-#Conclusion
+###Conclusions
 Altough Tornados are, by far, the greatest threat to public health, it is only on the 3rd place when looking at the economic damage. 
 
 Floods and Hurricanes/Typhoons are the events that cause more economic damage, but Floods are only the 4th cause of Health Damages and Hurricanes/Typhoons dont show up on the list. 
