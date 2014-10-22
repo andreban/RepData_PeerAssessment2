@@ -173,7 +173,7 @@ On the following plot, it is possible to see that floods are the greatest source
 ```r
 library(ggplot2)
 qplot(evtype, totaleconomicdamage,data= top10Dmg, geom="bar", stat="identity", 
-      color=evtype, fill=evtype, xlab="Event Type", ylab="Damage in Billions of US Dollars")
+      color=evtype, fill=evtype, xlab="Event Type", ylab="Damage in Billions of US Dollars")  + theme(axis.text.x = element_text(hjust=0, angle=90))
 ```
 
 ![plot of chunk unnamed-chunk-10](./PeerAssessment2_files/figure-html/unnamed-chunk-10.png) 
@@ -207,7 +207,7 @@ The number of people injured/deceased by Tornados is 96979, which is more than t
 
 ```r
 qplot(evtype, totalhealthdamage,data= top10Inj, geom="bar", stat="identity", 
-      color=evtype, fill=evtype, xlab="Event Type", ylab="Number of People Injured / Deceased")
+      color=evtype, fill=evtype, xlab="Event Type", ylab="Number of People Injured / Deceased") + theme(axis.text.x = element_text(hjust=0, angle=90))
 ```
 
 ![plot of chunk unnamed-chunk-12](./PeerAssessment2_files/figure-html/unnamed-chunk-12.png) 

@@ -149,7 +149,7 @@ On the following plot, it is possible to see that floods are the greatest source
 ```{r, fig.width=10}
 library(ggplot2)
 qplot(evtype, totaleconomicdamage,data= top10Dmg, geom="bar", stat="identity", 
-      color=evtype, fill=evtype, xlab="Event Type", ylab="Damage in Billions of US Dollars")
+      color=evtype, fill=evtype, xlab="Event Type", ylab="Damage in Billions of US Dollars")  + theme(axis.text.x = element_text(hjust=0, angle=90))
 ```
 
 
@@ -164,7 +164,7 @@ print(xtable(top10Dmg[,c(1,3)]), type="html", ,comment=FALSE)
 The number of people injured/deceased by Tornados is 96979, which is more than ten times the number of people injured/deceased by Excessive Heat(8428)
 ```{r, fig.width=10}
 qplot(evtype, totalhealthdamage,data= top10Inj, geom="bar", stat="identity", 
-      color=evtype, fill=evtype, xlab="Event Type", ylab="Number of People Injured / Deceased")
+      color=evtype, fill=evtype, xlab="Event Type", ylab="Number of People Injured / Deceased") + theme(axis.text.x = element_text(hjust=0, angle=90))
 
 ```
 
