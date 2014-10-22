@@ -20,7 +20,57 @@ Read the data file
 ```{r, cache=TRUE}
 stormdata <- read.csv(bzfile(localfile))
 colnames(stormdata) <-tolower(colnames(stormdata))
-stormdata$evtype = tolower(stormdata$evtype)
+
+#Filter dataset to contain only records thet have injuries, fatalities or damage
+damageInjurydata <- stormdata[stormdata$propdmg > 0 | stormdata$cropdmg > 0
+                              | stormdata$fatalities > 0 | stormdata$injuries > 0, c(8,23,24,25,26,27,28)]
+
+
+
+                           
+#convert to lower case and trim names and create factor
+damageInjurydata$evtype <- as.factor(gsub("^\\s+|\\s+$", "",tolower(damageInjurydata$evtype)))
+
+damageInjurydata$propdmgexp <- as.factor(gsub("^\\s+|\\s+$", "",tolower(damageInjurydata$propdmgexp)))
+
+damageInjurydata$cropdmgexp <- as.factor(gsub("^\\s+|\\s+$", "",tolower(damageInjurydata$cropdmgexp)))
+
+
+damageInjurydata$propdmg[damageInjurydata$propdmgexp == 'k'] <- damageInjurydata$propdmg[damageInjurydata$propdmgexp == 'k'] * 1000
+
+damageInjurydata$propdmg[damageInjurydata$propdmgexp == 'm'] <- damageInjurydata$propdmg[damageInjurydata$propdmgexp == 'm'] * 1000000
+
+damageInjurydata$propdmg[damageInjurydata$propdmgexp == 'b'] <- damageInjurydata$propdmg[damageInjurydata$propdmgexp == 'b'] * 1000000000
+
+
+damageInjurydata$cropdmg[damageInjurydata$cropdmgexp == 'k'] <- damageInjurydata$cropdmg[damageInjurydata$cropdmgexp == 'k'] * 1000
+
+damageInjurydata$cropdmg[damageInjurydata$cropdmgexp == 'm'] <- damageInjurydata$cropdmg[damageInjurydata$cropdmgexp == 'm'] * 1000000
+
+damageInjurydata$cropdmg[damageInjurydata$cropdmgexp == 'b'] <- damageInjurydata$cropdmg[damageInjurydata$cropdmgexp == 'b'] * 1000000000
+
+damageInjurydata$totaldmg <- damageInjurydata$cropdmg + damageInjurydata$propdmg;
+damageInjurydata$totalHumanLoss <- damageInjurydata$injuries + damageInjurydata$fatalities;
+
+lossbyevttype <- aggregate(cbind(totalHumanLoss, totaldmg) ~ evtype, damageInjurydata, FUN=sum)
+
+?sort
+lossbyevttype[order(lossbyevttype$totaldmg, decreasing=T),]
+
+lossbyevttype[order(lossbyevttype$totalHumanLoss, decreasing=T),]
+
+library(ggplot2)
+
+qplot(evtype, totaldmg, data=lossbyevttype)
+
+as.factor(damageInjurydata$propdmgexp)
+as.factor(damageInjurydata$cropdmg)
+colnames(damageInjurydata)
+dim(damageInjurydata)
+summary(damageInjurydata)
+damageInjurydata[damageInjurydata$cropdmg > 0, ]
+
+
 ```
 
 ```{r}
